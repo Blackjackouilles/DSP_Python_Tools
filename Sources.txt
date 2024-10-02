@@ -1,0 +1,4 @@
+https://docs.scipy.org/doc//scipy-1.2.3/reference/generated/scipy.signal.firwin.html
+https://www.youtube.com/watch?v=oZ39VCUvKjw -> We don't need a DAC - ESP32 PDM Audio
+https://culturesciencesphysique.ens-lyon.fr/ressource/numerisation-acoustique-Chareyron1.xml -> Numérisation d'un signal acoustique : effet de la quantification (partie 1)
+https://youtu.be/5lH-tQw0tlU
