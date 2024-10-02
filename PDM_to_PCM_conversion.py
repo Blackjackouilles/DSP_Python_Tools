@@ -39,15 +39,10 @@ def PDM_To_PCM(bits):
     plt.show()
 
     # Représentaion fréquentielle
-
-    # Décimation : prendre un échantillon tous les decimation_factor échantillons
-    pcm_output = pdm_filtered[::decimation_factor]
-
-    # Représentaion fréquentielle
     # Appliquer la FFT
-    pcm_fft = fft(pcm_output)
+    pcm_fft = fft(pdm_filtered)
     # Calculer les fréquences correspondantes
-    frequencies = np.fft.fftfreq(len(pcm_output), 1/16000)
+    frequencies = np.fft.fftfreq(len(pdm_filtered), 1/100)
     # Magnitude du spectre
     magnitude = np.abs(pcm_fft)
     # Visualisation du spectre de fréquences
@@ -57,29 +52,8 @@ def PDM_To_PCM(bits):
     plt.ylabel('Magnitude')
     plt.show()
 
-
-    # Visualiser le signal PCM
-    plt.plot(pcm_output)  # Afficher les 500 premiers échantillons PCM
-    plt.title('Signal PCM décimé')
-    plt.show()
-
     # Normaliser et mettre à l'échelle en 16 bits PCM
-    pcm_output_scaled = np.int16(pcm_output / np.max(np.abs(pcm_output)) * 32767)
-
-    # Paramètres du filtre passe-haut
-    cutoff_highpass = 20 / (16000 / 2)  # Fréquence de coupure 20 Hz, normalisée à la fréquence d'échantillonnage
-    numtaps_highpass = 63  # Taille du filtre FIR
-
-    # Créer un filtre FIR passe-haut
-    highpass_filter = firwin(numtaps_highpass, cutoff_highpass, pass_zero=False)
-
-    # Appliquer le filtre passe-haut au signal PCM
-    pcm_output_highpass = lfilter(highpass_filter, 1.0, pcm_output)
-
-    # Visualiser le signal après application du filtre passe-haut
-    plt.plot(pcm_output_highpass)  # Afficher les 500 premiers échantillons PCM filtrés
-    plt.title('Signal PCM avec filtre passe-haut appliqué')
-    plt.show()
+    pcm_output_scaled = np.int16(pdm_filtered / np.max(np.abs(pdm_filtered)) * 32767)
 
     # Créer un fichier wav
     with wave.open("output_pcm.wav", "w") as wav_file:  
@@ -121,8 +95,19 @@ file_path = 'PDM_signal_500_ms.csv'  # Remplace par le chemin de ton fichier CSV
 
 PDM_Bit_stream = PDM_Format_Extraction(file_path) #PDM data bit-stream extraction
 
-PDM_To_PCM(PDM_Bit_stream)
+PDM_Bit_stream = [0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,
+                  0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,
+                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                  0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,0,1,1,1,
+                  1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,
+                  0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,
+                  0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,
+                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                  0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,0,1,1,1,
+                  1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1]
 
-Display_Bit_Stream(PDM_Bit_stream[0:500])
+Display_Bit_Stream(PDM_Bit_stream) # Limit to [0:500]
+
+PDM_To_PCM(PDM_Bit_stream)
 
 print("End")
