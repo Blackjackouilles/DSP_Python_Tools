@@ -40,9 +40,9 @@ def PDM_To_PCM(bits):
 
     # Représentaion fréquentielle
     # Appliquer la FFT
-    pcm_fft = fft(pdm_filtered)
+    pcm_fft = fft(bits)
     # Calculer les fréquences correspondantes
-    frequencies = np.fft.fftfreq(len(pdm_filtered), 1/100)
+    frequencies = np.fft.fftfreq(len(bits), 1/100)
     # Magnitude du spectre
     magnitude = np.abs(pcm_fft)
     # Visualisation du spectre de fréquences
@@ -51,17 +51,6 @@ def PDM_To_PCM(bits):
     plt.xlabel('Fréquence (Hz)')
     plt.ylabel('Magnitude')
     plt.show()
-
-    # Normaliser et mettre à l'échelle en 16 bits PCM
-    pcm_output_scaled = np.int16(pdm_filtered / np.max(np.abs(pdm_filtered)) * 32767)
-
-    # Créer un fichier wav
-    with wave.open("output_pcm.wav", "w") as wav_file:  
-        # Paramètres : (nombre de canaux, taille d'échantillon en octets, fréquence d'échantillonnage, nombre d'échantillons, type de compression, nom)
-        wav_file.setparams((1, 2, 16000, len(pcm_output_scaled), "NONE", "not compressed"))
-    
-        # Écrire les données PCM dans le fichier wav
-        wav_file.writeframes(pcm_output_scaled.tobytes())
 
     return
 
@@ -89,11 +78,6 @@ def Display_Bit_Stream(bits):
     plt.show()
 
     return
-
-# Exemple d'utilisation
-file_path = 'PDM_signal_500_ms.csv'  # Remplace par le chemin de ton fichier CSV / PDM_signal_5_ms.csv frequency 1MHz
-
-PDM_Bit_stream = PDM_Format_Extraction(file_path) #PDM data bit-stream extraction
 
 PDM_Bit_stream = [0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,
                   0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,0,0,1,
