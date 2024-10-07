@@ -8,35 +8,21 @@ from scipy.signal import firwin, lfilter, decimate
 from scipy.io.wavfile import write
 from scipy.fft import fft
 
-def PDM_Format_Extraction(file_path):
-    # Lire le fichier CSV
-    try:
-        data = pd.read_csv(file_path)
-    except FileNotFoundError:
-        print("Le fichier spécifié n'a pas été trouvé.")
-        return
-
-    # Vérifier si le DataFrame a au moins deux colonnes
-    if data.shape[1] < 2:
-        print("Le fichier CSV doit contenir au moins deux colonnes.")
-        return
-
-    return data['Channel 1'].tolist()
-
+# Conversion PDM vers PCM
 def PDM_To_PCM(bits):
-    # Paramètres du filtre
-    decimation_factor = 23  # Exemple : facteur de décimation
-    cutoff = 0.45 / decimation_factor  # Fréquence de coupure normalisée
-    numtaps = 512  # Nombre de taps du filtre FIR / nombre de coefficients et donc déchantillons pris en compte pour la réponse en fréquence
-
-    # Créer un filtre FIR passe-bas
-    lowpass_filter = firwin(numtaps, cutoff)
-
-    # Appliquer le filtre au bit-stream PDM (lissage des bits)
-    pdm_filtered = lfilter(lowpass_filter, 1.0, bits)
+    nyq_rate = 1e6 / 2.
+ 
+    # The cutoff frequency of the filter: 100Hz
+    cutoff_hz = 100.0
+    # Length of the filter (number of coefficients, i.e. the filter order + 1)
+    numtaps = 512
+    # Use firwin to create a lowpass FIR filter
+    fir_coeff = firwin(numtaps, cutoff_hz/nyq_rate)
+    # Use lfilter to filter the signal with the FIR filter
+    pdm_filtered = lfilter(fir_coeff, 1.0, bits)
 
     # Visualiser le signal filtré
-    plt.plot(pdm_filtered[0:10000])  # Afficher les 500 premiers échantillons filtrés
+    plt.plot(pdm_filtered[0:10000])  # Afficher les premiers échantillons filtrés
     plt.title('Signal PDM filtré')
     plt.show()
 
@@ -49,21 +35,20 @@ def PDM_To_PCM(bits):
     pdm_decimated = decimate(pdm_filtered, decimation_factor_final)
 
     # Visualiser le signal filtré décimé
-    # Visualiser le signal filtré
-    plt.plot(pdm_decimated[0:1000])  # Afficher les 500 premiers échantillons filtrés
+    plt.plot(pdm_decimated[0:1000])  # Afficher les premiers échantillons filtrés et décimés
     plt.title('Signal PDM filtré')
     plt.show()
 
     # Représentaion fréquentielle avant filtrage
     # Appliquer la FFT
-    pcm_fft = fft(bits)
+    pdm_fft = fft(bits)
     # Calculer les fréquences correspondantes
     frequencies = np.fft.fftfreq(len(bits), 1/1e6)
     # Magnitude du spectre
-    magnitude = np.abs(pcm_fft)
+    magnitude = np.abs(pdm_fft)
     # Visualisation du spectre de fréquences
     plt.plot(frequencies[:len(frequencies)//2], magnitude[:len(magnitude)//2])
-    plt.title('Spectre fréquentiel du signal PCM')
+    plt.title('Spectre fréquentiel du signal PDM')
     plt.xlabel('Fréquence (Hz)')
     plt.ylabel('Magnitude')
     plt.show()
@@ -76,7 +61,7 @@ def PDM_To_PCM(bits):
     magnitude = np.abs(pcm_fft)
     # Visualisation du spectre de fréquences
     plt.plot(frequencies[:len(frequencies)//2], magnitude[:len(magnitude)//2])
-    plt.title('Spectre fréquentiel du signal PCM')
+    plt.title('Spectre fréquentiel du signal PCM filtré et décimé')
     plt.xlabel('Fréquence (Hz)')
     plt.ylabel('Magnitude')
     plt.show()
@@ -87,6 +72,7 @@ def PDM_To_PCM(bits):
 
     return
 
+# Visualisation d'un signal
 def Display_Bit_Stream(bits):
 
     # Création de l'axe des abscisses
@@ -110,9 +96,9 @@ def Display_Bit_Stream(bits):
     # Affichage du graphique
     plt.show()
 
-
     return
 
+# Génération signal PDM
 def PDM_Generation():
     # Paramètres
     frequency = 440  # Fréquence du signal en Hz
@@ -121,7 +107,6 @@ def PDM_Generation():
 
     # Création de l'échantillon
     t = np.arange(0, duration, 1/sampling_rate)  # Vecteur temps
-
 
     # Génération du signal sinusoïdal
     # np.sin(2 * np.pi * frequency * t) : Cette expression génère une onde sinusoïdale de fréquence frequency et de période t.
@@ -165,7 +150,7 @@ def PDM_Generation():
     
     # Visualiser le signal PDM
     plt.figure(figsize=(12, 6))
-    plt.plot(pdm_signal)  # Afficher les 1000 premiers bits
+    plt.plot(pdm_signal[:1000])  # Afficher les 1000 premiers bits
     plt.title('Signal PDM de 440 Hz')
     plt.xlabel('Échantillons')
     plt.ylabel('Bits PDM')
